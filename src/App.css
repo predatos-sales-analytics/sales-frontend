@@ -222,6 +222,160 @@
   margin-top: 0;
 }
 
+.section {
+  background: #fff;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 15px 45px -25px rgba(15, 23, 42, 0.35);
+}
+
+.section-header {
+  margin-bottom: 1.5rem;
+}
+
+.section-header h2 {
+  margin: 0.25rem 0 0;
+  font-size: 1.75rem;
+}
+
+.subsection {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.subsection:first-of-type {
+  border-top: none;
+  padding-top: 0;
+  margin-top: 0;
+}
+
+.subsection h3 {
+  margin: 0 0 1rem;
+  font-size: 1.25rem;
+  color: #1e293b;
+}
+
+.chart-container {
+  margin-top: 1rem;
+}
+
+.statistics-summary {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+  padding: 0.5rem;
+  background: #f1f5f9;
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.statistics-summary span {
+  color: #475569;
+}
+
+.heatmap-container {
+  overflow-x: auto;
+  margin-top: 1rem;
+}
+
+.heatmap-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.heatmap-table th {
+  background: #f1f5f9;
+  padding: 0.5rem;
+  text-align: center;
+  font-weight: 600;
+  border: 1px solid #e2e8f0;
+}
+
+.heatmap-row-label {
+  background: #f8fafc;
+  font-weight: 600;
+  padding: 0.5rem;
+  text-align: left;
+  border: 1px solid #e2e8f0;
+}
+
+.heatmap-cell {
+  padding: 0.5rem;
+  text-align: center;
+  border: 1px solid #e2e8f0;
+  min-width: 60px;
+  font-weight: 600;
+}
+
+.cluster-card {
+  background: #f8fafc;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  border-left: 4px solid #2563eb;
+}
+
+.cluster-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.cluster-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #1e293b;
+}
+
+.cluster-description {
+  color: #475569;
+  margin: 0.75rem 0;
+  line-height: 1.6;
+}
+
+.cluster-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  margin: 1rem 0;
+  padding: 1rem;
+  background: #fff;
+  border-radius: 0.5rem;
+}
+
+.metric-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.recommendations {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.recommendations h4 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  color: #1e293b;
+}
+
+.recommendations ul {
+  margin: 0;
+  padding-left: 1.5rem;
+  color: #475569;
+}
+
+.recommendations li {
+  margin: 0.5rem 0;
+  line-height: 1.5;
+}
+
 @media (max-width: 768px) {
   .dashboard-header {
     flex-direction: column;
@@ -229,5 +383,15 @@
 
   .dag-selector select {
     width: 100%;
+  }
+
+  .cluster-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .cluster-metrics {
+    grid-template-columns: 1fr;
   }
 }
