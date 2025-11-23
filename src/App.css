@@ -1,0 +1,233 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.app-shell {
+  min-height: 100vh;
+  padding: 2.5rem clamp(1rem, 3vw, 3rem);
+  background: radial-gradient(circle at top, #f5f7ff 0%, #fefefe 50%, #f8fafc 100%);
+  color: #0f172a;
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.dashboard-header h1 {
+  margin: 0.25rem 0;
+  font-size: clamp(1.8rem, 3vw, 2.6rem);
+}
+
+.subtitle {
+  color: #475569;
+  margin: 0;
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-size: 0.75rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.dag-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-weight: 600;
+}
+
+.dag-selector select {
+  min-width: 220px;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid #cbd5f5;
+  font-size: 1rem;
+}
+
+.alert {
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  background: #e0f2fe;
+  color: #0f172a;
+  margin-bottom: 1rem;
+}
+
+.alert.error {
+  background: #fee2e2;
+  color: #7f1d1d;
+}
+
+.task-section {
+  margin-bottom: 2.5rem;
+}
+
+.task-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.task-header h2 {
+  margin: 0.25rem 0 0;
+  text-transform: capitalize;
+}
+
+.badge {
+  background: #e0e7ff;
+  color: #1e1b4b;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+.artifacts-grid {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+}
+
+.artifact-card {
+  background: #fff;
+  border-radius: 1rem;
+  padding: 1.25rem;
+  box-shadow: 0 15px 45px -25px rgba(15, 23, 42, 0.35);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.artifact-card header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: baseline;
+}
+
+.artifact-card h3 {
+  margin: 0.15rem 0;
+  font-size: 1.15rem;
+}
+
+.artifact-card time {
+  font-size: 0.85rem;
+  color: #94a3b8;
+}
+
+.artifact-type {
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-size: 0.7rem;
+  color: #c084fc;
+  margin: 0;
+}
+
+.artifact-description {
+  color: #475569;
+  margin: 0;
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.75rem;
+}
+
+.metric-card {
+  background: #eef2ff;
+  border-radius: 0.75rem;
+  padding: 0.75rem;
+}
+
+.metric-label {
+  display: block;
+  font-size: 0.9rem;
+  color: #475569;
+}
+
+.metric-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1d4ed8;
+}
+
+.metric-value small {
+  font-size: 0.8rem;
+  margin-left: 0.25rem;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.data-table thead {
+  background: #e2e8f0;
+}
+
+.data-table th,
+.data-table td {
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.chart-wrapper {
+  height: 260px;
+  margin-bottom: 1rem;
+}
+
+.helper-text {
+  color: #94a3b8;
+  margin: 0.25rem 0;
+}
+
+.helper-text.error {
+  color: #dc2626;
+}
+
+.json-preview {
+  background: #0f172a;
+  color: #e2e8f0;
+  font-family: 'JetBrains Mono', monospace;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  font-size: 0.85rem;
+  overflow-x: auto;
+}
+
+.empty-state {
+  background: #fff;
+  border-radius: 1rem;
+  padding: 2rem;
+  text-align: center;
+  box-shadow: 0 10px 40px -25px rgba(15, 23, 42, 0.35);
+}
+
+.empty-state h2 {
+  margin-top: 0;
+}
+
+@media (max-width: 768px) {
+  .dashboard-header {
+    flex-direction: column;
+  }
+
+  .dag-selector select {
+    width: 100%;
+  }
+}
