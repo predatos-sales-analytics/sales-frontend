@@ -1,25 +1,89 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useJsonData } from '../hooks/usePipelineData';
 import { DataTable } from './DataTable';
 import type {
   ProductRecommendationsPayload,
   CustomerRecommendationsPayload,
+  ProductAssociationsPayload,
 } from '../types/pipelines';
 
+const formatList = (value: number[] | string[]) => {
+  if (!Array.isArray(value)) return value ?? '';
+  return value.join(', ');
+};
+
+type ProductRecsResponse =
+  | ProductRecommendationsPayload
+  | { data: ProductRecommendationsPayload };
+type CustomerRecsResponse =
+  | CustomerRecommendationsPayload
+  | { data: CustomerRecommendationsPayload };
+type AssociationsResponse =
+  | ProductAssociationsPayload
+  | { data: ProductAssociationsPayload };
+
+const extractProductPayload = (
+  payload: ProductRecsResponse | null | undefined,
+): ProductRecommendationsPayload | undefined => {
+  if (!payload) return undefined;
+  if ('recommendations' in payload && Array.isArray(payload.recommendations)) {
+    return payload;
+  }
+  if ('data' in payload) {
+    return payload.data;
+  }
+  return undefined;
+};
+
+const extractCustomerPayload = (
+  payload: CustomerRecsResponse | null | undefined,
+): CustomerRecommendationsPayload | undefined => {
+  if (!payload) return undefined;
+  if ('recommendations' in payload && Array.isArray(payload.recommendations)) {
+    return payload;
+  }
+  if ('data' in payload) {
+    return payload.data;
+  }
+  return undefined;
+};
+
+const extractAssociationsPayload = (
+  payload: AssociationsResponse | null | undefined,
+): ProductAssociationsPayload | undefined => {
+  if (!payload) return undefined;
+  if ('top_rules' in payload && Array.isArray(payload.top_rules)) {
+    return payload;
+  }
+  if ('data' in payload) {
+    return payload.data;
+  }
+  return undefined;
+};
+
 export function RecommendationsSection() {
-  const productRecs = useJsonData<ProductRecommendationsPayload>({
-    path: 'advanced/recommendations/product_recs.json',
-  });
-  const customerRecs = useJsonData<CustomerRecommendationsPayload>({
-    path: 'advanced/recommendations/customer_recs.json',
+  const associations = useJsonData<AssociationsResponse>({
+    path: 'advanced/recommendations/product_associations.json',
   });
 
-  const loading = productRecs.loading || customerRecs.loading;
-  const hasError = productRecs.error && customerRecs.error;
+  const productRecs = useJsonData<ProductRecsResponse>({
+    path: 'advanced/recommendations/product_recommendations.json',
+  });
+  const customerRecs = useJsonData<CustomerRecsResponse>({
+    path: 'advanced/recommendations/customer_recommendations.json',
+  });
+
+  const loading = associations.loading || productRecs.loading || customerRecs.loading;
+  const hasError = associations.error && productRecs.error && customerRecs.error;
+
+  const associationPayload = extractAssociationsPayload(associations.data);
+  const [productFilter, setProductFilter] = useState('');
+  const [customerFilter, setCustomerFilter] = useState('');
 
   const productRows = useMemo(() => {
-    if (!productRecs.data?.data) return [];
-    return productRecs.data.data.flatMap((entry) =>
+    const payload = extractProductPayload(productRecs.data);
+    if (!payload?.recommendations) return [];
+    return payload.recommendations.flatMap((entry) =>
       entry.recommendations.map((rec) => ({
         product_id: entry.product_id,
         recommended_product_id: rec.product_id,
@@ -31,8 +95,9 @@ export function RecommendationsSection() {
   }, [productRecs.data]);
 
   const customerRows = useMemo(() => {
-    if (!customerRecs.data?.data) return [];
-    return customerRecs.data.data.flatMap((entry) =>
+    const payload = extractCustomerPayload(customerRecs.data);
+    if (!payload?.recommendations) return [];
+    return payload.recommendations.flatMap((entry) =>
       entry.recommendations.map((rec) => ({
         customer_id: entry.customer_id,
         recommended_product_id: rec.product_id,
@@ -42,6 +107,38 @@ export function RecommendationsSection() {
       })),
     );
   }, [customerRecs.data]);
+
+  const associationRows = useMemo(() => {
+    if (!associationPayload?.top_rules) return [];
+    return associationPayload.top_rules.map((rule, index) => ({
+      id: `${index}-${formatList(rule.antecedent)}`,
+      antecedent: formatList(rule.antecedent),
+      consequent: formatList(rule.consequent),
+      confidence: rule.confidence ?? null,
+      lift: rule.lift ?? null,
+      support: rule.support ?? null,
+    }));
+  }, [associationPayload]);
+
+  const filteredProductRows = useMemo(() => {
+    if (!productFilter.trim()) return productRows;
+    const query = productFilter.trim().toLowerCase();
+    return productRows.filter(
+      (row) =>
+        String(row.product_id).toLowerCase().includes(query) ||
+        String(row.recommended_product_id).toLowerCase().includes(query),
+    );
+  }, [productRows, productFilter]);
+
+  const filteredCustomerRows = useMemo(() => {
+    if (!customerFilter.trim()) return customerRows;
+    const query = customerFilter.trim().toLowerCase();
+    return customerRows.filter(
+      (row) =>
+        String(row.customer_id).toLowerCase().includes(query) ||
+        String(row.recommended_product_id).toLowerCase().includes(query),
+    );
+  }, [customerRows, customerFilter]);
 
   if (loading) {
     return (
@@ -57,25 +154,32 @@ export function RecommendationsSection() {
       <section className="section">
         <h2>Recomendaciones</h2>
         <p className="helper-text error">
-          No se encontraron archivos de recomendaciones. Ejecuta el pipeline y sincroniza
-          <code> output/recommendations/*.json</code> dentro de <code>public/data/advanced/recommendations/</code>.
+          No se encontraron archivos de recomendaciones. Ejecuta el pipeline y sincroniza los JSON
+          dentro de <code>public/data/advanced/recommendations/</code>.
         </p>
       </section>
     );
   }
 
+  const productSummary = extractProductPayload(productRecs.data)?.summary;
+  const customerSummary = extractCustomerPayload(customerRecs.data)?.summary;
+  const associationsSummary = associationPayload?.summary;
+
   const summaryChips = [
-    productRecs.data?.total_products
-      ? `${productRecs.data.total_products.toLocaleString()} productos con sugerencias`
+    associationsSummary
+      ? `${associationsSummary.total_rules.toLocaleString()} reglas activas`
       : null,
-    customerRecs.data?.total_customers
-      ? `${customerRecs.data.total_customers.toLocaleString()} clientes priorizados`
+    productSummary?.total_products
+      ? `${productSummary.total_products.toLocaleString()} productos con sugerencias`
       : null,
-    productRecs.data
-      ? `Soporte ≥ ${(productRecs.data.min_support * 100).toFixed(1)}%`
+    customerSummary?.total_customers
+      ? `${customerSummary.total_customers.toLocaleString()} clientes priorizados`
       : null,
-    productRecs.data
-      ? `Confianza ≥ ${(productRecs.data.min_confidence * 100).toFixed(1)}%`
+    associationsSummary?.min_support !== undefined
+      ? `Soporte ≥ ${(associationsSummary.min_support * 100).toFixed(1)}%`
+      : null,
+    associationsSummary?.min_confidence !== undefined
+      ? `Confianza ≥ ${(associationsSummary.min_confidence * 100).toFixed(1)}%`
       : null,
   ].filter(Boolean) as string[];
 
@@ -85,7 +189,8 @@ export function RecommendationsSection() {
         <p className="eyebrow">Recomendaciones</p>
         <h2>Sugerencias generadas por FP-Growth</h2>
         <p className="helper-text">
-          Resultados consumidos desde <code>output/recommendations/*.json</code> (sincronizados en <code>public/data/advanced/recommendations/</code>).
+          Resultados consumidos desde <code>public/data/advanced/recommendations/*.json</code>. Copia aquí los
+          archivos generados en <code>output/advanced/recommendations</code>.
         </p>
       </div>
 
@@ -100,7 +205,33 @@ export function RecommendationsSection() {
       )}
 
       <div className="subsection">
+        <h3>Top Reglas de Asociación</h3>
+        {associationRows.length > 0 ? (
+          <DataTable
+            columns={['antecedent', 'consequent', 'confidence', 'lift', 'support']}
+            rows={associationRows}
+            maxRows={30}
+          />
+        ) : (
+          <p className="helper-text">
+            No se encontraron reglas recientes. Ejecuta nuevamente el pipeline para generarlas.
+          </p>
+        )}
+      </div>
+
+      <div className="subsection">
         <h3>Productos complementarios</h3>
+        <div className="filter-bar">
+          <label>
+            Buscar por producto&nbsp;
+            <input
+              type="text"
+              value={productFilter}
+              onChange={(event) => setProductFilter(event.target.value)}
+              placeholder="ID de producto o sugerido"
+            />
+          </label>
+        </div>
         {productRows.length > 0 ? (
           <DataTable
             columns={[
@@ -110,7 +241,7 @@ export function RecommendationsSection() {
               'lift',
               'support',
             ]}
-            rows={productRows}
+            rows={filteredProductRows}
             maxRows={40}
           />
         ) : (
@@ -122,22 +253,32 @@ export function RecommendationsSection() {
 
       <div className="subsection">
         <h3>Recomendaciones por cliente</h3>
+        <div className="filter-bar">
+          <label>
+            Buscar por cliente&nbsp;
+            <input
+              type="text"
+              value={customerFilter}
+              onChange={(event) => setCustomerFilter(event.target.value)}
+              placeholder="ID de cliente o producto sugerido"
+            />
+          </label>
+        </div>
         {customerRows.length > 0 ? (
           <DataTable
             columns={[
               'customer_id',
               'recommended_product_id',
-              'based_on_product',
               'confidence',
               'lift',
             ]}
-            rows={customerRows}
+            rows={filteredCustomerRows}
             maxRows={40}
           />
         ) : (
           <p className="helper-text">
-            No se generaron sugerencias personalizadas. Revisa que existan reglas y clientes
-            en los archivos del pipeline.
+            No se generaron sugerencias personalizadas. Revisa que existan reglas y clientes en los
+            archivos del pipeline.
           </p>
         )}
       </div>

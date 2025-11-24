@@ -1,7 +1,20 @@
 import { useJsonData } from '../hooks/usePipelineData';
-import { MetricsGrid } from './MetricsGrid';
 import { DataTable } from './DataTable';
 import type { BasicMetrics } from '../types/pipelines';
+
+type HighlightCard = { id: string; label: string; value: string; helper?: string };
+
+const formatNumber = (value?: number | null) => {
+  if (value === undefined || value === null) return null;
+  return value.toLocaleString('es-CO');
+};
+
+const normalizeBasicMetrics = (payload: unknown): BasicMetrics | null => {
+  if (!payload || typeof payload !== 'object') return null;
+  const raw = (payload as any).basic_metrics ?? payload;
+  if (!raw || typeof raw !== 'object') return null;
+  return raw as BasicMetrics;
+};
 
 export function ExecutiveSummarySection() {
   const basicMetrics = useJsonData({ path: 'summary/basic_metrics.json' });
@@ -31,22 +44,28 @@ export function ExecutiveSummarySection() {
     );
   }
 
-  const metrics: Array<{ id: string; label: string; value: number | null; suffix?: string }> = [];
-  if (basicMetrics.data) {
-    const data = basicMetrics.data as { basic_metrics?: BasicMetrics } | BasicMetrics;
-    const m = (data as any).basic_metrics || data;
-    if (m && typeof m === 'object' && 'total_transacciones' in m) {
-      metrics.push(
-        { id: 'transactions', label: 'Total Transacciones', value: m.total_transacciones },
-        {
-          id: 'products',
-          label: 'Productos Vendidos',
-          value: m.total_productos_vendidos,
-        },
-        { id: 'customers', label: 'Clientes Únicos', value: m.clientes_unicos },
-        { id: 'unique_products', label: 'Productos Únicos', value: m.productos_unicos }
-      );
-    }
+  const normalized = normalizeBasicMetrics(basicMetrics.data);
+
+  const highlightCards: HighlightCard[] = [];
+  const totalTransactions =
+    normalized?.total_transactions ?? normalized?.total_transacciones ?? null;
+  const totalSales =
+    normalized?.total_sales_units ?? normalized?.total_productos_vendidos ?? null;
+
+  if (totalTransactions !== null) {
+    highlightCards.push({
+      id: 'transactions-highlight',
+      label: 'Total de transacciones procesadas',
+      value: formatNumber(totalTransactions) ?? `${totalTransactions}`,
+    });
+  }
+
+  if (totalSales !== null) {
+    highlightCards.push({
+      id: 'sales-highlight',
+      label: 'Unidades totales vendidas',
+      value: formatNumber(totalSales) ?? `${totalSales}`,
+    });
   }
 
   return (
@@ -56,7 +75,17 @@ export function ExecutiveSummarySection() {
         <h2>Métricas Principales</h2>
       </div>
 
-      {metrics.length > 0 && <MetricsGrid metrics={metrics} />}
+      {highlightCards.length > 0 && (
+        <div className="highlight-card-grid" role="list">
+          {highlightCards.map((card) => (
+            <article key={card.id} className="highlight-card" role="listitem">
+              <p className="metric-label">{card.label}</p>
+              <p className="highlight-value">{card.value}</p>
+              {card.helper ? <p className="helper-text">{card.helper}</p> : null}
+            </article>
+          ))}
+        </div>
+      )}
 
       {topProducts.data && (
         <div className="subsection">

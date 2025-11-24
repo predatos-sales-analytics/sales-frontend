@@ -31,7 +31,6 @@ export function DataTable({ columns, rows, maxRows = 20 }: DataTableProps) {
           ))}
         </tbody>
       </table>
-      {rows.length > limitedRows.length ? <p className="helper-text">Mostrando {limitedRows.length} de {rows.length} filas</p> : null}
     </div>
   );
 }

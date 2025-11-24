@@ -1,10 +1,14 @@
 // Tipos para los datos de los pipelines
 
 export interface BasicMetrics {
-  total_transacciones: number;
-  total_productos_vendidos: number;
-  clientes_unicos: number;
-  productos_unicos: number;
+  // Formato anterior (es-ES)
+  total_transacciones?: number;
+  total_productos_vendidos?: number;
+  clientes_unicos?: number;
+  productos_unicos?: number;
+  // Formato actual (en-US)
+  total_transactions?: number;
+  total_sales_units?: number;
 }
 
 export interface TopItem {
@@ -117,12 +121,15 @@ export interface ProductRecommendationEntry {
 }
 
 export interface ProductRecommendationsPayload {
-  generated_at: string;
-  recommendation_type: string;
-  total_products: number;
-  min_support: number;
-  min_confidence: number;
-  data: ProductRecommendationEntry[];
+  generated_at?: string;
+  recommendation_type?: string;
+  summary: {
+    total_products: number;
+    max_recommendations_per_product?: number;
+    min_support?: number;
+    min_confidence?: number;
+  };
+  recommendations: ProductRecommendationEntry[];
 }
 
 export interface CustomerRecommendationEntry {
@@ -137,11 +144,38 @@ export interface CustomerRecommendationEntry {
 }
 
 export interface CustomerRecommendationsPayload {
-  generated_at: string;
-  recommendation_type: string;
-  total_customers: number;
-  max_customers: number;
-  min_support: number;
-  min_confidence: number;
-  data: CustomerRecommendationEntry[];
+  generated_at?: string;
+  recommendation_type?: string;
+  summary: {
+    total_customers: number;
+    max_customers?: number;
+    min_support?: number;
+    min_confidence?: number;
+  };
+  recommendations: CustomerRecommendationEntry[];
+}
+
+export interface ProductAssociationRule {
+  antecedent: number[] | string[];
+  consequent: number[] | string[];
+  confidence?: number;
+  lift?: number;
+  support?: number;
+}
+
+export interface ProductAssociationItemset {
+  items: number[] | string[];
+  freq: number;
+}
+
+export interface ProductAssociationsPayload {
+  summary: {
+    total_rules: number;
+    total_itemsets: number;
+    min_support: number;
+    min_confidence: number;
+  };
+  top_rules: ProductAssociationRule[];
+  top_itemsets: ProductAssociationItemset[];
+  generated_at?: string;
 }
