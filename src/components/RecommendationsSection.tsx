@@ -8,10 +8,10 @@ import type {
 
 export function RecommendationsSection() {
   const productRecs = useJsonData<ProductRecommendationsPayload>({
-    path: 'recommendations/product_recs.json',
+    path: 'advanced/recommendations/product_recs.json',
   });
   const customerRecs = useJsonData<CustomerRecommendationsPayload>({
-    path: 'recommendations/customer_recs.json',
+    path: 'advanced/recommendations/customer_recs.json',
   });
 
   const loading = productRecs.loading || customerRecs.loading;
@@ -58,7 +58,7 @@ export function RecommendationsSection() {
         <h2>Recomendaciones</h2>
         <p className="helper-text error">
           No se encontraron archivos de recomendaciones. Ejecuta el pipeline y sincroniza
-          <code> output/recommendations/*.json</code> dentro de <code>public/data</code>.
+          <code> output/recommendations/*.json</code> dentro de <code>public/data/advanced/recommendations/</code>.
         </p>
       </section>
     );
@@ -85,7 +85,7 @@ export function RecommendationsSection() {
         <p className="eyebrow">Recomendaciones</p>
         <h2>Sugerencias generadas por FP-Growth</h2>
         <p className="helper-text">
-          Resultados consumidos desde <code>output/recommendations/*.json</code>.
+          Resultados consumidos desde <code>output/recommendations/*.json</code> (sincronizados en <code>public/data/advanced/recommendations/</code>).
         </p>
       </div>
 
