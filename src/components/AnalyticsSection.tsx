@@ -52,6 +52,44 @@ export function AnalyticsSection() {
     return sortedData;
   }, [customerPurchaseBoxplot.data]);
 
+  const filteredCorrelationMatrix = useMemo(() => {
+    if (!correlationMatrix.data) return null;
+
+    const raw = correlationMatrix.data.correlation_data;
+    if (!raw?.variables?.length) return correlationMatrix.data;
+
+    const filteredVariables = raw.variables.filter(
+      (variable) => variable !== "frequency"
+    );
+
+    const filteredMatrix = filteredVariables.reduce<
+      Record<string, Record<string, number | null>>
+    >((acc, rowVar) => {
+      const row = raw.matrix[rowVar] || {};
+      acc[rowVar] = filteredVariables.reduce<Record<string, number | null>>(
+        (rowAcc, colVar) => {
+          rowAcc[colVar] = row[colVar] ?? null;
+          return rowAcc;
+        },
+        {}
+      );
+      return acc;
+    }, {});
+
+    const filteredVariableNames = { ...raw.variable_names };
+    delete filteredVariableNames.frequency;
+
+    return {
+      ...correlationMatrix.data,
+      correlation_data: {
+        ...raw,
+        variables: filteredVariables,
+        variable_names: filteredVariableNames,
+        matrix: filteredMatrix,
+      },
+    };
+  }, [correlationMatrix.data]);
+
   return (
     <section className="section flex flex-col gap-10">
       <div className="section-header">
@@ -149,8 +187,8 @@ export function AnalyticsSection() {
         {correlationMatrix.error && (
           <p className="helper-text error">{correlationMatrix.error}</p>
         )}
-        {correlationMatrix.data && (
-          <HeatmapChart data={correlationMatrix.data} type="correlation" />
+        {filteredCorrelationMatrix && (
+          <HeatmapChart data={filteredCorrelationMatrix} type="correlation" />
         )}
       </div>
     </section>
