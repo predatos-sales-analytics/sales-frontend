@@ -1,7 +1,9 @@
 import { useJsonData } from "../hooks/usePipelineData";
 import { TimeSeriesChart } from "./TimeSeriesChart";
 import { BoxplotChart } from "./BoxplotChart";
+import { CustomerBoxplotChart } from "./CustomerBoxplotChart";
 import { HeatmapChart } from "./HeatmapChart";
+import { useMemo } from "react";
 import type {
   TimeSeriesData,
   DistributionData,
@@ -24,9 +26,31 @@ export function AnalyticsSection() {
   const categoryBoxplot = useJsonData<DistributionData>({
     path: "analytics/category_products_by_store_distribution.json",
   });
+  const customerPurchaseBoxplot = useJsonData<DistributionData>({
+    path: "analytics/customer_purchase_distribution.json",
+  });
   const correlationMatrix = useJsonData<CorrelationMatrix>({
     path: "analytics/variable_correlation.json",
   });
+
+  // Filtrar y ordenar los top 200 clientes para el boxplot
+  const top200Customers = useMemo(() => {
+    if (!customerPurchaseBoxplot.data?.data) return null;
+
+    // Ordenar por total_products_purchased descendente y tomar los primeros 200
+    const sortedData = [...customerPurchaseBoxplot.data.data]
+      .sort(
+        (a: any, b: any) =>
+          b.total_products_purchased - a.total_products_purchased
+      )
+      .slice(0, 200)
+      .map((item: any) => ({
+        customer_id: item.customer_id,
+        total_products_purchased: item.total_products_purchased,
+      }));
+
+    return sortedData;
+  }, [customerPurchaseBoxplot.data]);
 
   return (
     <section className="section flex flex-col gap-10">
@@ -102,7 +126,22 @@ export function AnalyticsSection() {
         {categoryBoxplot.data && <BoxplotChart data={categoryBoxplot.data} />}
       </div>
 
-      <div className="subsection flex flex-col gap-4">
+      <div className="subsection flex flex-col gap-4 mt-10 pt-6 border-t border-slate-200/70">
+        <h3>Boxplot - Top 200 Clientes por Volumen de Compra</h3>
+        <p className="helper-text">
+          Distribución de compras de los 200 clientes con mayor volumen de
+          productos.
+        </p>
+        {customerPurchaseBoxplot.loading && (
+          <p className="helper-text">Cargando...</p>
+        )}
+        {customerPurchaseBoxplot.error && (
+          <p className="helper-text error">{customerPurchaseBoxplot.error}</p>
+        )}
+        {top200Customers && <CustomerBoxplotChart data={top200Customers} />}
+      </div>
+
+      <div className="subsection flex flex-col gap-4 mt-10 pt-6 border-t border-slate-200/70">
         <h3>Heatmap - Matriz de Correlación</h3>
         {correlationMatrix.loading && (
           <p className="helper-text">Cargando...</p>
