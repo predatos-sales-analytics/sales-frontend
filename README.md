@@ -1,65 +1,57 @@
-# Sales Analytics Frontend
+# 💻 Sales Analytics Frontend
 
-Dashboard React para visualizar los resultados de los pipelines de análisis de Spark.
+Dashboard construido en React + Vite para consumir los resultados que producen los pipelines de Spark (carpeta `airflow/`). Cada vista del dashboard lee archivos JSON almacenados en `public/data/`.
 
-## Estructura de Datos
+## 👥 Autores
 
-El frontend espera que los JSON generados por los pipelines estén en `public/data/` con la siguiente estructura:
+- Juan David Colonia Aldana – A00395956
+- Miguel Ángel Gonzalez Arango – A00395687
+
+## 🗂️ Estructura de carpetas
 
 ```
-public/
-  data/
-    summary/
-      basic_metrics.json
-      top_10_products.json
-      top_10_customers.json
-      top_10_categories.json
-      top_10_categories_by_products.json
-      top_10_peak_days.json
-      top_10_peak_days_by_products.json
-    analytics/
-      daily_sales.json
-      weekly_sales.json
-      monthly_sales.json
-      day_of_week_patterns_distribution.json
-      category_products_by_store_distribution.json
-      variable_correlation.json
-    advanced/
-      clustering/
-        customer_clusters.json
-        cluster_summary.json
-        clustering_visualization.json
-      recommendations/
-        (archivos de recomendaciones cuando estén disponibles)
+sales-frontend/
+├── public/
+│   └── data/
+│       ├── summary/
+│       ├── analytics/
+│       └── advanced/
+│           ├── clustering/
+│           └── recommendations/
+└── src/
+    ├── components/         # Secciones y visualizaciones (TimeSeriesChart, Boxplot, etc.)
+    ├── hooks/              # Hooks para cargar JSON (useJsonData)
+    ├── types/              # Tipos TypeScript compartidos
+    └── App.tsx             # Layout principal con rutas
 ```
 
-## Copiar Datos desde Spark
+Cada ruta espera archivos concretos:
 
-Después de ejecutar los pipelines, copia los JSON generados:
+- `public/data/summary/`: métricas ejecutivas (`basic_metrics.json`, `top_10_products.json`, etc.).
+- `public/data/analytics/`: series temporales, patrones por día y heatmaps.
+- `public/data/advanced/clustering/`: resultados de segmentación.
+- `public/data/advanced/recommendations/`: reglas e inferencias del recomendador.
 
-### Windows (PowerShell)
-```powershell
-# Desde el directorio raíz del proyecto
-Copy-Item -Path "airflow\output\summary\*" -Destination "sales-frontend\public\data\summary\" -Recurse -Force
-Copy-Item -Path "airflow\output\analytics\*" -Destination "sales-frontend\public\data\analytics\" -Recurse -Force
-Copy-Item -Path "airflow\output\advanced\*" -Destination "sales-frontend\public\data\advanced\" -Recurse -Force
-```
+> **Importante:** después de correr los pipelines en Spark, copia manualmente los JSON generados dentro de `airflow/output/` hacia las carpetas equivalentes en `public/data/`. Sin esos archivos el dashboard mostrará mensajes de “datos faltantes”.
 
-### Linux/Mac
-```bash
-# Desde el directorio raíz del proyecto
-mkdir -p sales-frontend/public/data/{summary,analytics,advanced/{clustering,recommendations}}
-cp -r airflow/output/summary/* sales-frontend/public/data/summary/
-cp -r airflow/output/analytics/* sales-frontend/public/data/analytics/
-cp -r airflow/output/advanced/* sales-frontend/public/data/advanced/
-```
+## ⚙️ Cómo funciona
 
-## Desarrollo
+- Cada componente usa el hook `useJsonData` para leer el JSON correspondiente desde `public/data/...`.
+- Los gráficos están construidos con Recharts (line charts, bar charts, heatmaps, boxplots).
+- El dashboard se organiza en secciones (`ExecutiveSummarySection`, `AnalyticsSection`, `ClusteringSection`, `RecommendationsSection`) que corresponden 1:1 con los pipelines de Spark.
 
-```bash
-cd sales-frontend
-npm install
-npm run dev
-```
+## 🧪 Desarrollo local
 
-El frontend estará disponible en `http://localhost:5173`
+1. Clona el repositorio y asegúrate de tener Node 18+.
+2. Copia los archivos JSON a `public/data/` como se describió arriba.
+3. Instala dependencias y levanta el servidor de desarrollo:
+
+   ```bash
+   cd sales-frontend
+   npm install
+   npm run dev
+   ```
+
+   La aplicación estará disponible en `http://localhost:5173/`.
+
+Para generar una versión estática (`npm run build`) recuerda dejar los JSON en `public/data/`, ya que el dashboard no hace llamadas a API externas: todo se sirve desde archivos estáticos.
