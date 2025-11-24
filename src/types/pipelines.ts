@@ -106,3 +106,43 @@ export interface ClusteringVisualization {
   generated_at: string;
 }
 
+export interface ProductRecommendationEntry {
+  product_id: number;
+  recommendations: Array<{
+    product_id: number;
+    confidence?: number | null;
+    lift?: number | null;
+    support?: number | null;
+  }>;
+}
+
+export interface ProductRecommendationsPayload {
+  generated_at: string;
+  recommendation_type: string;
+  total_products: number;
+  min_support: number;
+  min_confidence: number;
+  data: ProductRecommendationEntry[];
+}
+
+export interface CustomerRecommendationEntry {
+  customer_id: number;
+  recommendations: Array<{
+    product_id: number;
+    based_on_product?: number;
+    confidence?: number | null;
+    lift?: number | null;
+    support?: number | null;
+  }>;
+}
+
+export interface CustomerRecommendationsPayload {
+  generated_at: string;
+  recommendation_type: string;
+  total_customers: number;
+  max_customers: number;
+  min_support: number;
+  min_confidence: number;
+  data: CustomerRecommendationEntry[];
+}
+

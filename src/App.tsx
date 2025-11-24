@@ -1,74 +1,63 @@
-import { useEffect, useState } from 'react';
-import './App.css';
-import { ExecutiveSummarySection } from './components/ExecutiveSummarySection';
-import { AnalyticsSection } from './components/AnalyticsSection';
-import { ClusteringSection } from './components/ClusteringSection';
-import { RecommendationsSection } from './components/RecommendationsSection';
+import { useMemo, useState } from "react";
+import {
+  NavLink,
+  Navigate,
+  Route,
+  Routes,
+  useLocation,
+} from "react-router-dom";
+import "./App.css";
+import { ExecutiveSummarySection } from "./components/ExecutiveSummarySection";
+import { AnalyticsSection } from "./components/AnalyticsSection";
+import { ClusteringSection } from "./components/ClusteringSection";
+import { RecommendationsSection } from "./components/RecommendationsSection";
 
-const PIPELINE_SECTIONS = [
+const PIPELINE_ROUTES = [
   {
-    id: 'executive-summary',
-    label: 'Resumen Ejecutivo',
-    description: 'KPIs diarios y rankings clave.',
-    component: <ExecutiveSummarySection />,
+    id: "executive-summary",
+    label: "Resumen Ejecutivo",
+    icon: "📊",
+    path: "/executive-summary",
+    element: <ExecutiveSummarySection />,
   },
   {
-    id: 'analytics',
-    label: 'Analítica Temporal',
-    description: 'Series de tiempo y correlaciones.',
-    component: <AnalyticsSection />,
+    id: "analytics",
+    label: "Analítica Temporal",
+    icon: "🕒",
+    path: "/analytics",
+    element: <AnalyticsSection />,
   },
   {
-    id: 'clustering',
-    label: 'Segmentación de Clientes',
-    description: 'Perfiles y clusters detectados.',
-    component: <ClusteringSection />,
+    id: "clustering",
+    label: "Segmentación de Clientes",
+    icon: "🧩",
+    path: "/clustering",
+    element: <ClusteringSection />,
   },
   {
-    id: 'recommendations',
-    label: 'Recomendaciones',
-    description: 'Asociaciones producto↔cliente.',
-    component: <RecommendationsSection />,
+    id: "recommendations",
+    label: "Recomendaciones",
+    icon: "🤝",
+    path: "/recommendations",
+    element: <RecommendationsSection />,
   },
 ];
 
 function App() {
-  const [activePipeline, setActivePipeline] = useState(PIPELINE_SECTIONS[0].id);
+  const location = useLocation();
+  const [sidebarExpanded, setSidebarExpanded] = useState(true);
 
-  useEffect(() => {
-    if (typeof window === 'undefined' || !('IntersectionObserver' in window)) {
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
-        if (visible.length > 0) {
-          setActivePipeline(visible[0].target.id);
-        }
-      },
-      {
-        rootMargin: '-40% 0px -40% 0px',
-        threshold: [0.1, 0.25, 0.5],
-      },
+  const currentSection = useMemo(() => {
+    return (
+      PIPELINE_ROUTES.find((route) => location.pathname.startsWith(route.path))
+        ?.label ?? ""
     );
-
-    PIPELINE_SECTIONS.forEach(({ id }) => {
-      const element = document.getElementById(id);
-      if (element) {
-        observer.observe(element);
-      }
-    });
-
-    return () => observer.disconnect();
-  }, []);
+  }, [location.pathname]);
 
   return (
     <div className="app-shell">
       <div className="app-layout">
-        <aside className="sidebar">
+        <aside className={`sidebar ${sidebarExpanded ? "" : "collapsed"}`}>
           <div className="sidebar-header">
             <p className="eyebrow">Pipelines</p>
             <h2>Explora los resultados</h2>
@@ -76,35 +65,77 @@ function App() {
               Navega entre los artefactos que generan los DAGs de Spark.
             </p>
           </div>
+
+          <button
+            className="sidebar-toggle"
+            onClick={() => setSidebarExpanded((prev) => !prev)}
+            aria-label={
+              sidebarExpanded
+                ? "Colapsar menú lateral"
+                : "Expandir menú lateral"
+            }
+            type="button"
+          >
+            {sidebarExpanded ? "◄ Ocultar" : "► Mostrar"}
+          </button>
+
           <nav className="pipeline-nav">
-            {PIPELINE_SECTIONS.map((section) => (
-              <a
+            {PIPELINE_ROUTES.map((section) => (
+              <NavLink
                 key={section.id}
-                className={`pipeline-link ${activePipeline === section.id ? 'active' : ''}`}
-                href={`#${section.id}`}
-                onClick={() => setActivePipeline(section.id)}
+                className={({ isActive }) =>
+                  `pipeline-link ${isActive ? "active" : ""}`
+                }
+                to={section.path}
+                end
               >
+                <span className="pipeline-icon" aria-hidden="true">
+                  {section.icon}
+                </span>
                 <span className="pipeline-name">{section.label}</span>
-                <span className="pipeline-description">{section.description}</span>
-              </a>
+              </NavLink>
             ))}
           </nav>
         </aside>
 
-        <main className="pipeline-content">
+        <main
+          className={`pipeline-content ${sidebarExpanded ? "" : "collapsed"}`}
+        >
           <header className="dashboard-header">
             <div>
               <p className="eyebrow">Sales Analytics</p>
               <h1>Dashboard de Análisis de Ventas</h1>
-              <p className="subtitle">Visualización de resultados generados por los pipelines de Spark.</p>
+              <p className="subtitle">
+                Visualización de resultados generados por los pipelines de
+                Spark.
+              </p>
+              <p className="helper-text">
+                {currentSection
+                  ? `Estás viendo: ${currentSection}`
+                  : "Selecciona un pipeline en la barra lateral."}
+              </p>
             </div>
+            <button
+              className="sidebar-mobile-toggle"
+              onClick={() => setSidebarExpanded((prev) => !prev)}
+            >
+              {sidebarExpanded ? "Cerrar menú" : "Abrir menú"}
+            </button>
           </header>
 
-          {PIPELINE_SECTIONS.map((section) => (
-            <div key={section.id} id={section.id} className="pipeline-section-anchor">
-              {section.component}
-            </div>
-          ))}
+          <Routes>
+            <Route
+              index
+              element={<Navigate to="/executive-summary" replace />}
+            />
+            {PIPELINE_ROUTES.map((route) => (
+              <Route key={route.id} path={route.path} element={route.element} />
+            ))}
+            <Route
+              path="*"
+              element={<Navigate to="/executive-summary" replace />}
+            />
+          </Routes>
         </main>
       </div>
     </div>
