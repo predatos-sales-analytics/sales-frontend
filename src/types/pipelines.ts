@@ -145,4 +145,3 @@ export interface CustomerRecommendationsPayload {
   min_confidence: number;
   data: CustomerRecommendationEntry[];
 }
-
