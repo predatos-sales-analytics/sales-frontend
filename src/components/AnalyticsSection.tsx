@@ -6,7 +6,6 @@ import type {
   TimeSeriesData,
   DistributionData,
   CorrelationMatrix,
-  HeatmapData,
 } from "../types/pipelines";
 
 export function AnalyticsSection() {
@@ -103,7 +102,7 @@ export function AnalyticsSection() {
         {categoryBoxplot.data && <BoxplotChart data={categoryBoxplot.data} />}
       </div>
 
-      <div className="subsection flex flex-col gap-4 pt-30">
+      <div className="subsection flex flex-col gap-4">
         <h3>Heatmap - Matriz de Correlación</h3>
         {correlationMatrix.loading && (
           <p className="helper-text">Cargando...</p>
