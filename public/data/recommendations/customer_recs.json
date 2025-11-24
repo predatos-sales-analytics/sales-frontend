@@ -1,0 +1,50 @@
+{
+  "generated_at": "2025-11-24T00:00:00Z",
+  "recommendation_type": "customer_personalized",
+  "total_customers": 3,
+  "max_customers": 200,
+  "min_support": 0.02,
+  "min_confidence": 0.45,
+  "data": [
+    {
+      "customer_id": 9001,
+      "recommendations": [
+        {
+          "product_id": 205,
+          "based_on_product": 101,
+          "confidence": 0.78,
+          "lift": 1.92
+        },
+        {
+          "product_id": 310,
+          "based_on_product": 101,
+          "confidence": 0.64,
+          "lift": 1.55
+        }
+      ]
+    },
+    {
+      "customer_id": 9002,
+      "recommendations": [
+        {
+          "product_id": 107,
+          "based_on_product": 214,
+          "confidence": 0.71,
+          "lift": 1.61
+        }
+      ]
+    },
+    {
+      "customer_id": 9003,
+      "recommendations": [
+        {
+          "product_id": 502,
+          "based_on_product": 214,
+          "confidence": 0.53,
+          "lift": 1.33
+        }
+      ]
+    }
+  ]
+}
+
